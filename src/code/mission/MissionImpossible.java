@@ -65,37 +65,6 @@ public class MissionImpossible extends SearchProblem {
 		grid2D = grid2d;
 	}
 	
-	public static void main(String[] args) {
-//		String grid = "6,6;1,1;3,3;3,5,0,1,2,4,4,3,1,5;4,43,94,40,92;3";
-		String grid = "5,5;2,1;1,0;1,3,4,2,4,1,3,1;54,31,39,98;2";
-//		String grid = "6,6;1,1;3,3;3,5,0,1,2,4,4,3,1,5;4,43,94,40,92;3";
-//		String grid = "7,7;1,6;5,4;2,2,1,4,0,3,2,3,0,1,4,5;6,44,82,49,24,54;4";
-//		String grid = "8,8;4,2;7,4;5,1,7,7,4,0,6,7;93,85,72,78;1";
-//		String grid = "9,9;8,7;5,0;0,8,2,6,5,6,1,7,5,5,8,3,2,2,2,5,0,7;11,13,75,50,56,44,26,77,18;2";
-//		String grid = "10,10;6,3;4,8;9,1,2,4,4,0,3,9,6,4,3,4,0,5,1,6,1,9;97,49,25,17,94,3,96,35,98;3";
-//		String grid = "11,11;7,7;8,8;9,7,7,4,7,6,9,6,9,5,9,1,4,5,3,10,5,10;14,3,96,89,61,22,17,70,83;5";
-//		String grid = "12,12;7,7;10,6;0,4,2,2,1,3,8,2,4,2,9,3;95,4,68,2,94,91;5";
-//		String grid = "13,13;7,4;4,0;9,3,3,9,12,7,7,9,3,12,11,8,4,2,12,6;22,62,74,56,43,70,17,14;4";
-//		String grid = "14,14;13,9;1,13;5,3,9,7,11,10,8,3,10,7,13,6,11,1,5,2;76,30,2,49,63,43,72,1;6";
-//		String grid = "15,15;5,10;14,14;0,0,0,1,0,2,0,3,0,4,0,5,0,6,0,7,0,8;81,13,40,38,52,63,66,36,13;1";
-		
-		System.out.println("grid = " + grid);
-//		InterpretGrid(grid);
-//		System.out.println("xSizeOfGrid : "+ xSizeOfGrid);
-//		System.out.println("ySizeOfGrid : "+ ySizeOfGrid);
-//		System.out.println("submarinePosition : "+ submarinePosition);
-//		System.out.println("ethanPosition : "+ ethanPosition);
-//		System.out.println("truckSize : "+ truckSize);
-//		for(int i= 0; i<agentsPosition.length; i++) {
-//			System.out.println("agent "+i+ " position : "+ agentsPosition[i]);
-//		}
-//		for(int i= 0; i<agentsHealth.length; i++) {
-//			System.out.println("agent "+i+ "health : "+ agentsHealth[i]);
-//		}
-		
-		System.out.println(solve(grid,"ID",false));
-	}
-
 	public static int random(int min, int max) {  // generates a random number in the range(min --> max)
 		return (int) ((Math.random() * (max - min)) + min);
 	}
@@ -220,6 +189,8 @@ public class MissionImpossible extends SearchProblem {
 		}
 		
 		path = getPath(result);
+		if(visualize)
+			visualize(path);
 		return path;
 		
 	}
@@ -414,7 +385,6 @@ public class MissionImpossible extends SearchProblem {
 		MissionImpossibleNode node = null;
 		int allowedDepth = 0;
 		boolean newDepth = false;
-		int maxDepth = 0;
 		boolean [] [] removedAgents = new boolean [xSizeOfGrid] [ySizeOfGrid];
 		while(!nodes.isEmpty()) {
 			node = nodes.remove(0);
@@ -1269,7 +1239,104 @@ public class MissionImpossible extends SearchProblem {
 	}
 	
 
-
+	public static void visualize(String path) {
+		boolean taken = false;
+		StringTokenizer st = new StringTokenizer(path, ";");
+		String steps = st.nextToken(";");
+		StringTokenizer st1 = new StringTokenizer(steps, ",");
+		String currentStep = "";
+		Position currentEthanPosition = new Position(ethanPosition.x , ethanPosition.y);
+		Position[] currentAgentsPosition = new Position[agentsPosition.length];
+		boolean printed = false;
+		for(int i=0;i<agentsPosition.length;i++) {
+			System.out.println(agentsPosition[i]);
+		}
+		System.out.println("steps : "+ steps);
+		for(int i = 0; i<currentAgentsPosition.length;i++) {
+			currentAgentsPosition[i] = new Position(agentsPosition[i].x , agentsPosition[i].y);
+		}
+		while(st1.hasMoreTokens()) {
+			printed = false;
+			currentStep = st1.nextToken();
+			if(currentStep.equals("up"))
+				currentEthanPosition.x =  currentEthanPosition.x -1;
+			if(currentStep.equals("down"))
+				currentEthanPosition.x =  currentEthanPosition.x +1;
+			if(currentStep.equals("left"))
+				currentEthanPosition.y =  currentEthanPosition.y -1;
+			if(currentStep.equals("right"))
+				currentEthanPosition.y =  currentEthanPosition.y +1;
+			
+			System.out.println(currentEthanPosition.x + " , " + currentEthanPosition.y );	
+		for(int i = 0;i<xSizeOfGrid;i++) {
+			for(int j = 0;j<ySizeOfGrid;j++) {
+				taken = false;
+				
+				if(i == currentEthanPosition.x) {
+					if(j == currentEthanPosition.y) {
+						
+						if(i == submarinePosition.x) { //if it is submarine's position
+							if(j == submarinePosition.y) {
+								System.out.print("ES |");
+								printed = true;
+							}
+						}
+						
+						for(int k = 0;k<currentAgentsPosition.length ; k++) { //if it is an agent's position
+							if(currentAgentsPosition[k] != null) {
+							if(i == currentAgentsPosition[k].x) {
+								if(j == currentAgentsPosition[k].y) {
+									if(currentStep.equals("carry")) {
+										currentAgentsPosition[k] = null;
+										System.out.print(" E |");
+										printed = true;
+									}
+									else {
+									System.out.print("EA |");
+									printed = true;
+									}
+								}}}}
+						
+						if(!printed) //if the position is free
+						System.out.print(" E |");
+						taken = true;
+					}
+				}
+				
+				if(i == submarinePosition.x) {  // for submarine
+					if(j == submarinePosition.y) {
+						if(!taken) {
+						System.out.print(" S |");
+						taken = true;
+						}
+					}
+				}
+				
+				for(int k = 0;k<currentAgentsPosition.length ; k++) { // for the agents
+					
+					if(currentAgentsPosition[k] != null) {
+					if(i == currentAgentsPosition[k].x) {
+						if(j == currentAgentsPosition[k].y) {
+							if(currentStep.equals("carry")) {
+							}
+							else {
+								if(!taken) {
+							System.out.print(" A |");
+							taken = true;
+								}
+						}
+						}
+					}
+				}
+				}
+				if(!taken) {
+					System.out.print("---|");
+				}
+			}
+			System.out.println("");
+		}
+		}
+	}
 	
 
 	
